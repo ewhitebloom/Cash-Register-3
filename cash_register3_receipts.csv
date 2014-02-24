@@ -1,0 +1,4 @@
+item_type, item_buy, item_sell, sku, item_revenue, date, item_quantity
+Light, 2.50, 5.00, 120945,25.0,02/24/2014,5
+Medium, 3.25, 7.50, 679340,15.0,02/24/2014,2
+Bold, 4.75, 9.75, 328745,48.75,02/24/2014,5

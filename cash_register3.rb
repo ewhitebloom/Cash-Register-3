@@ -1,5 +1,6 @@
 require 'csv'
 require 'pry'
+require 'date'
 
 def prompt(output)
   puts "#{output}"
@@ -16,6 +17,9 @@ def csvdata
     menuarray[counter][:buy_price] = "#{row[1]}"
     menuarray[counter][:sell_price] = "#{row[2]}"
     menuarray[counter][:sku] = "#{row[3]}"
+    menuarray[counter][:item_revenue] = 0
+    menuarray[counter][:date] = nil
+    menuarray[counter][:item_quantity] = 0
     counter += 1
   end
   menuarray
@@ -57,15 +61,15 @@ def item_subtotal(quantity_of_selection, selection_price)
   format_currency(quantity_of_selection * selection_price)
 end
 
-def receipt(receipt_array, selection_name, item_subtotal, quantity_of_selection)
-  if receipt_array.any?{ |h| h[:item] == selection_name }
-   index = receipt_array.index{|h| h[:item] == selection_name}
-   receipt_array[index][:item_revenue] += item_subtotal.to_f
-   receipt_array[index][:item_quantity] += quantity_of_selection.to_i
- else
-   receipt_array << {item: selection_name ,item_revenue: item_subtotal.to_f, item_quantity: quantity_of_selection.to_i }
+def receipt(menuarray, selection_name, item_subtotal, quantity_of_selection)
+  if menuarray.any?{ |h| h[:type] == selection_name }
+   index = menuarray.index{|h| h[:type] == selection_name}
+   menuarray[index][:item_type] = selection_name
+   menuarray[index][:item_revenue] += item_subtotal.to_f
+   menuarray[index][:date] = Time.now.strftime("%m/%d/%Y")
+   menuarray[index][:item_quantity] += quantity_of_selection.to_i
  end
- receipt_array
+ menuarray
 end
 
 def grand_total(receipt)
@@ -74,7 +78,19 @@ def grand_total(receipt)
    item_price = item[:item_revenue].to_f
    totals += item_price
  end
- totals
+ totals.to_f
+end
+
+def write_CSV(receipt)
+  CSV.open('cash_register3_receipts.csv', "ab", headers: true) do |row|
+    receipt.each do |item|
+      row << [item[:item_type],item[:buy_price], item[:sell_price], item[:sku], item[:item_revenue], item[:date], item[:item_quantity]]
+    end
+  end
+end
+
+def read_CSV_receipt(csv_file)
+
 end
 
 def list_item_prices(array)
@@ -112,7 +128,7 @@ end
 
 def ordering_session
   selection_output = nil
-  receipt_array = []
+  menuarray = csvdata
   until selection_output == 4
     selection_output = selection
     break if selection_output == 4
@@ -121,11 +137,12 @@ def ordering_session
     item_subtotal = item_subtotal(quantity_of_selection_output,selection_price(csvdata, selection_index(selection_output)))
     selection_name = selection_name( csvdata, selection_index(selection_output))
 
-    receipt = receipt(receipt_array, selection_name(csvdata, selection_index(selection_output)), item_subtotal(quantity_of_selection_output,selection_price(csvdata, selection_index(selection_output))), quantity_of_selection_output)
+    receipt = receipt(menuarray, selection_name(csvdata, selection_index(selection_output)), item_subtotal(quantity_of_selection_output,selection_price(csvdata, selection_index(selection_output))), quantity_of_selection_output)
 
     grand_totals = grand_total(receipt)
-    puts "Subtotal: $#{grand_totals}"
+    puts "Subtotal: $#{format_currency(grand_totals)}"
   end
+  write_CSV(receipt)
   puts "==Sale Complete=="
   puts "Subtotal: $#{grand_totals}"
   final_receipt_storage = receipt
@@ -141,7 +158,6 @@ display_menu(csvdata)
 final_totals = ordering_session
 
 change(final_totals)
-
 
 
 # sold_item_prices = []
