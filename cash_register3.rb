@@ -54,7 +54,7 @@ def quantity_of_selection
 end
 
 def item_subtotal(quantity_of_selection, selection_price)
-  quantity_of_selection * selection_price
+  format_currency(quantity_of_selection * selection_price)
 end
 
 def receipt(receipt_array, selection_name, item_subtotal, quantity_of_selection)
@@ -117,14 +117,26 @@ def ordering_session
   puts "Subtotal: $#{grand_totals}"
   final_receipt_storage = receipt
   final_receipt_storage.each do |item_transactions|
-   puts "$#{item_transactions[:item_subtotal]} - #{item_transactions[:item_quantity]} #{item_transactions[:item_type]}"
+   puts "$#{format_currency(item_transactions[:item_subtotal])} - #{item_transactions[:item_quantity]} #{item_transactions[:item]}"
  end
- puts "Total: $#{final_totals}"
+ puts "Total: $#{format_currency(grand_totals)}"
+ grand_totals
 end
 
 puts "Welcome to James' coffee emporium!"
 display_menu(csvdata)
-ordering_session
+final_totals = ordering_session
+
+puts "What is the amount tendered?"
+tendered = gets.chomp.to_f
+difference = tendered - final_totals
+
+if difference >= 0.00
+  change_due_successful_output(tendered,final_totals)
+else
+  change_due_failure_output(tendered,final_totals)
+  exit
+end
 # sold_item_prices = []
 # list_item_prices(sold_item_prices)
 # total = subtotal(sold_item_prices)
