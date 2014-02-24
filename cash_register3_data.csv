@@ -1,0 +1,4 @@
+type, buyprice, sellprice, sku
+Light, 2.50, 5.00, 120945
+Medium, 3.25, 7.50, 679340
+Bold, 4.75, 9.75, 328745
