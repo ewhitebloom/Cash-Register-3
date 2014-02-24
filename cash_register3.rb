@@ -50,8 +50,7 @@ def selection_price(menuarray, selection_index)
 end
 
 def quantity_of_selection
-  puts "How many?"
-  gets.chomp.to_i
+  prompt("How many?")
 end
 
 def item_subtotal(quantity_of_selection, selection_price)
@@ -71,7 +70,7 @@ end
 
 def grand_total(receipt)
   totals = 0
-  receipt_array.each do |item|
+  receipt.each do |item|
    item_price = item[:item_subtotal].to_f
    totals += item_price
  end
@@ -99,21 +98,23 @@ def change_due_failure_output(amount_tendered, total)
 end
 
 def ordering_session
-  until selection == 4
+  selection_output = nil
+  until selection_output == 4
     receipt_array = []
     selection_output = selection
+    break if selection_output == 4
     quantity_of_selection_output = quantity_of_selection
 
     item_subtotal = item_subtotal(quantity_of_selection_output,selection_price(csvdata, selection_index(selection_output)))
     selection_name = selection_name( csvdata, selection_index(selection_output))
 
-    receipt = receipt(receipt_array, selection_name( csvdata, selection_index(selection_output)), item_subtotal(quantity_of_selection_output,selection_price(csvdata, selection_index(selection_output))), quantity_of_selection_output)
+    receipt = receipt(receipt_array, selection_name(csvdata, selection_index(selection_output)), item_subtotal(quantity_of_selection_output,selection_price(csvdata, selection_index(selection_output))), quantity_of_selection_output)
 
     grand_totals = grand_total(receipt)
     puts "Subtotal: $#{grand_totals}"
   end
   puts "==Sale Complete=="
-  final_receipt_storage = receipt(selection_name(csvdata,selection_index(selection)),item_subtotal(quantity_of_selection, selection_price(selection_index(selection), csvdata)))
+  final_receipt_storage = receipt(selection_name(csvdata,selection_index(selection_output)),item_subtotal(quantity_of_selection_output, selection_price(selection_index(selection_output), csvdata)))
   final_receipt_storage.each do |item_transactions|
    puts "$#{item_transactions[:item_subtotal]} - #{item_transactions[:item_quantity]} #{item_transactions[:item_type]}"
  end
