@@ -1,4 +1,5 @@
 require 'csv'
+require 'pry'
 
 def prompt(output)
   puts "#{output}"
@@ -62,9 +63,9 @@ def receipt(receipt_array, selection_name, item_subtotal, quantity_of_selection)
    index = receipt_array.index{|h| h[:item] == selection_name}
    receipt_array[index][:item_subtotal] += item_subtotal.to_f
    receipt_array[index][:item_quantity] += quantity_of_selection.to_i
-  else
+ else
    receipt_array << {item: selection_name ,item_subtotal: item_subtotal.to_f, item_quantity: quantity_of_selection.to_i }
-  end
+ end
  receipt_array
 end
 
@@ -99,12 +100,14 @@ end
 
 def ordering_session
   until selection == 4
+    receipt_array = []
+    selection_output = selection
+    quantity_of_selection_output = quantity_of_selection
 
-    item_subtotal = item_subtotal(quantity_of_selection,selection_price(csvdata, selection_index(selection)))
-    selection_name = selection_name( csvdata, selection_index(selection))
-    quantity_of_selection = quantity_of_selection
+    item_subtotal = item_subtotal(quantity_of_selection_output,selection_price(csvdata, selection_index(selection_output)))
+    selection_name = selection_name( csvdata, selection_index(selection_output))
 
-    receipt = receipt(receipt_array, selection_name, item_subtotal, quantity_of_selection)
+    receipt = receipt(receipt_array, selection_name( csvdata, selection_index(selection_output)), item_subtotal(quantity_of_selection_output,selection_price(csvdata, selection_index(selection_output))), quantity_of_selection_output)
 
     grand_totals = grand_total(receipt)
     puts "Subtotal: $#{grand_totals}"
@@ -116,8 +119,6 @@ def ordering_session
  end
  puts "Total: $#{final_totals}"
 end
-
-receipt_array = []
 
 puts "Welcome to James' coffee emporium!"
 display_menu(csvdata)
