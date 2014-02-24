@@ -99,8 +99,8 @@ end
 
 def ordering_session
   selection_output = nil
+  receipt_array = []
   until selection_output == 4
-    receipt_array = []
     selection_output = selection
     break if selection_output == 4
     quantity_of_selection_output = quantity_of_selection
@@ -114,7 +114,8 @@ def ordering_session
     puts "Subtotal: $#{grand_totals}"
   end
   puts "==Sale Complete=="
-  final_receipt_storage = receipt(selection_name(csvdata,selection_index(selection_output)),item_subtotal(quantity_of_selection_output, selection_price(selection_index(selection_output), csvdata)))
+  puts "Subtotal: $#{grand_totals}"
+  final_receipt_storage = receipt
   final_receipt_storage.each do |item_transactions|
    puts "$#{item_transactions[:item_subtotal]} - #{item_transactions[:item_quantity]} #{item_transactions[:item_type]}"
  end
