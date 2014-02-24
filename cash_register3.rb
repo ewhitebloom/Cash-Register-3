@@ -60,10 +60,10 @@ end
 def receipt(receipt_array, selection_name, item_subtotal, quantity_of_selection)
   if receipt_array.any?{ |h| h[:item] == selection_name }
    index = receipt_array.index{|h| h[:item] == selection_name}
-   receipt_array[index][:item_subtotal] += item_subtotal.to_f
+   receipt_array[index][:item_revenue] += item_subtotal.to_f
    receipt_array[index][:item_quantity] += quantity_of_selection.to_i
  else
-   receipt_array << {item: selection_name ,item_subtotal: item_subtotal.to_f, item_quantity: quantity_of_selection.to_i }
+   receipt_array << {item: selection_name ,item_revenue: item_subtotal.to_f, item_quantity: quantity_of_selection.to_i }
  end
  receipt_array
 end
@@ -71,7 +71,7 @@ end
 def grand_total(receipt)
   totals = 0
   receipt.each do |item|
-   item_price = item[:item_subtotal].to_f
+   item_price = item[:item_revenue].to_f
    totals += item_price
  end
  totals
@@ -84,6 +84,19 @@ end
 
 def format_currency(currency)
   sprintf('%.2f', currency)
+end
+
+def change(final_totals)
+  puts "What is the amount tendered?"
+  tendered = gets.chomp.to_f
+  difference = tendered - final_totals
+
+  if difference >= 0.00
+    change_due_successful_output(tendered,final_totals)
+  else
+    change_due_failure_output(tendered,final_totals)
+    exit
+  end
 end
 
 def change_due_successful_output(amount_tendered, total)
@@ -117,7 +130,7 @@ def ordering_session
   puts "Subtotal: $#{grand_totals}"
   final_receipt_storage = receipt
   final_receipt_storage.each do |item_transactions|
-   puts "$#{format_currency(item_transactions[:item_subtotal])} - #{item_transactions[:item_quantity]} #{item_transactions[:item]}"
+   puts "$#{format_currency(item_transactions[:item_revenue])} - #{item_transactions[:item_quantity]} #{item_transactions[:item]}"
  end
  puts "Total: $#{format_currency(grand_totals)}"
  grand_totals
@@ -127,16 +140,10 @@ puts "Welcome to James' coffee emporium!"
 display_menu(csvdata)
 final_totals = ordering_session
 
-puts "What is the amount tendered?"
-tendered = gets.chomp.to_f
-difference = tendered - final_totals
+change(final_totals)
 
-if difference >= 0.00
-  change_due_successful_output(tendered,final_totals)
-else
-  change_due_failure_output(tendered,final_totals)
-  exit
-end
+
+
 # sold_item_prices = []
 # list_item_prices(sold_item_prices)
 # total = subtotal(sold_item_prices)
