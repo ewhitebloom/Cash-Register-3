@@ -97,17 +97,34 @@ def read_CSV_receipt
     counter = 0
     if row["date"] == input
       csv_row_type = row["item_type"]
-        if totals[counter][0] == csv_row_type
-         totals[counter][0] = row["item_type"]
-         totals[counter][4].to_f += row["item_revenue"].to_f
-         totals[counter][6].to_f += row["item_quantity"].to_f
-       elsif totals[counter][0]
+       if totals.any?{ |h| h[0] == csv_row_type}
+         index = totals.index{ |h| h[0] == csv_row_type}
+         totals[index][4] = totals[index][4].to_f + row["item_revenue"].to_f
+         totals[index][6] = totals[index][6].to_f + row["item_quantity"].to_f
+       else
          totals << [row["item_type"], row["buy_price"], row["sell_price"], row["sku"], row["item_revenue"], row["date"], row["item_quantity"]]
        end
-   end
+    end
    counter += 1
  end
+ puts "On #{input} we sold:"
  totals
+end
+
+def CSV_report(totals)
+     total_sales = 0
+     total_profit = 0
+    totals.each do |item|
+     profit = item[4].to_f - item[1].to_f * item[6].to_f
+     puts "SKU # #{item[3]}, Name: #{item[0]}, Quantity: #{item[6]}, Revenue: #{item[4]}, Profit: #{profit} "
+     total_profit += profit
+    end
+    totals.each do |item|
+      total_sales += item[4].to_f
+    end
+    puts
+    puts "Totals Sales: #{format_currency(total_sales)}"
+    puts "Total Profit: #{format_currency(total_profit)}"
 end
 
 def format_currency(currency)
@@ -143,6 +160,11 @@ def ordering_session
   menuarray = csvdata
   until selection_output == 4
     selection_output = selection
+    if selection_output == 5
+      csv_Read_Data = read_CSV_receipt
+      CSV_report(csv_Read_Data)
+      exit
+    end
     break if selection_output == 4
     quantity_of_selection_output = quantity_of_selection
 
@@ -171,16 +193,3 @@ final_totals = ordering_session
 
 change(final_totals)
 
-# puts read_CSV_receipt
-
-# sold_item_prices = []
-# list_item_prices(sold_item_prices)
-# total = subtotal(sold_item_prices)
-# puts "The total amount due is $#{format_currency(total)}"
-# amount_tendered = prompt("What is the amount tendered?").to_f
-
-# if amount_tendered >= total
-#   change_due_successful_output(amount_tendered, total)
-# else
-#   change_due_failure_output(amount_tendered, total)
-# end
