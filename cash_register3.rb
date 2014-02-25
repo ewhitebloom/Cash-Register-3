@@ -89,13 +89,25 @@ def write_CSV(receipt)
   end
 end
 
-def read_CSV_receipt(csv_file)
-
-end
-
-def list_item_prices(array)
-  puts "Here are your item prices:", ""
-  array.each { |x| puts "$#{format_currency(x)}"}
+def read_CSV_receipt
+  puts "What date would you like reports for? (MM/DD/YYYY)"
+  input = gets.chomp.to_s
+  totals = []
+  CSV.foreach('cash_register3_receipts.csv', headers: true) do |row|
+    counter = 0
+    if row["date"] == input
+      csv_row_type = row["item_type"]
+        if totals[counter][0] == csv_row_type
+         totals[counter][0] = row["item_type"]
+         totals[counter][4].to_f += row["item_revenue"].to_f
+         totals[counter][6].to_f += row["item_quantity"].to_f
+       elsif totals[counter][0]
+         totals << [row["item_type"], row["buy_price"], row["sell_price"], row["sku"], row["item_revenue"], row["date"], row["item_quantity"]]
+       end
+   end
+   counter += 1
+ end
+ totals
 end
 
 def format_currency(currency)
@@ -147,7 +159,7 @@ def ordering_session
   puts "Subtotal: $#{grand_totals}"
   final_receipt_storage = receipt
   final_receipt_storage.each do |item_transactions|
-   puts "$#{format_currency(item_transactions[:item_revenue])} - #{item_transactions[:item_quantity]} #{item_transactions[:item]}"
+   puts "$#{format_currency(item_transactions[:item_revenue])} - #{item_transactions[:item_quantity]} #{item_transactions[:item_type]}"
  end
  puts "Total: $#{format_currency(grand_totals)}"
  grand_totals
@@ -159,6 +171,7 @@ final_totals = ordering_session
 
 change(final_totals)
 
+# puts read_CSV_receipt
 
 # sold_item_prices = []
 # list_item_prices(sold_item_prices)
